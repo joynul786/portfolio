@@ -19,9 +19,7 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <!-- EmailJS Library -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
-    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function () {
             emailjs.init({
@@ -802,7 +800,17 @@
 
         @media (max-width: 768px) {
             .timeline::before {
-                left: 20px;
+                display: none;
+            }
+
+            .timeline-dot {
+                display: none;
+            }
+
+            .timeline-content {
+                width: 100%;
+                margin-left: 0 !important;
+                padding: 15px;
             }
         }
 
@@ -832,8 +840,8 @@
 
         @media (max-width: 768px) {
             .timeline-content {
-                width: calc(100% - 60px);
-                margin-left: 50px !important;
+                width: 100%;
+                margin-left: 0 !important;
                 padding: 15px;
             }
         }
@@ -1126,7 +1134,7 @@
             </div>
             <div class="floating-icon icon-2">
                 <i class="fab fa-node-js" style="color: #68a063;"></i>
-            </div>  
+            </div>
             <div class="floating-icon icon-3">
                 <i class="fab fa-js" style="color: #f7df1e;"></i>
             </div>
@@ -1467,8 +1475,6 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
-    </script>
 
     <script>
         // Initialize AOS
@@ -1523,21 +1529,13 @@
             };
         });
 
-        // EmailJS Integration - WORKS LOCALLY!
-        // EmailJS Integration - REPLACE WITH YOUR ACTUAL CREDENTIALS
-        (function () {
-            // Initialize EmailJS with your public key
-            // Get this from: EmailJS Dashboard > Account > API Keys
-            emailjs.init("qpSTylskm8GHH5Y1H"); // REPLACE THIS
-        })();
+        // EmailJS Integration - FULLY FUNCTIONAL WITH PROVIDED KEYS
+        const contactForm = document.getElementById('contactForm');
+        const formStatus = document.getElementById('formStatus');
+        const submitBtn = document.getElementById('submitBtn');
 
-        // Form submission handler
-        document.getElementById('contactForm').addEventListener('submit', function (event) {
+        contactForm.addEventListener('submit', function (event) {
             event.preventDefault();
-
-            const form = this;
-            const formStatus = document.getElementById('formStatus');
-            const submitBtn = document.getElementById('submitBtn');
 
             // Show loading status
             formStatus.className = 'form-status loading';
@@ -1545,86 +1543,39 @@
             formStatus.style.display = 'block';
             submitBtn.disabled = true;
 
-            // Get form data
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const subject = document.getElementById('subject').value || 'New Portfolio Message';
-            const message = document.getElementById('message').value;
-
-            // Prepare email parameters (match these with your EmailJS template variables)
+            // Prepare template parameters (matches EmailJS template variables)
             const templateParams = {
-                from_name: name,
-                from_email: email,
-                subject: subject,
-                message: message,
+                from_name: document.getElementById('name').value,
+                from_email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value || 'New Portfolio Message',
+                message: document.getElementById('message').value,
                 to_email: 'skjoynul20@gmail.com',
-                reply_to: email
+                reply_to: document.getElementById('email').value
             };
 
-            // Send email using EmailJS
-            // REPLACE THESE WITH YOUR ACTUAL IDs:
+            // Send email using EmailJS with actual service and template IDs
             emailjs.send('service_oo3z75c', 'template_ojhf7qf', templateParams)
                 .then(function (response) {
                     console.log('SUCCESS!', response.status, response.text);
                     formStatus.className = 'form-status success';
                     formStatus.innerHTML = '<i class="fas fa-check-circle"></i> Message sent successfully! I\'ll get back to you soon.';
-                    form.reset();
-
-
+                    contactForm.reset();
+                    setTimeout(() => {
+                        formStatus.style.display = 'none';
+                    }, 5000);
                 })
                 .catch(function (error) {
-                    console.log('FAILED...', error);
+                    console.error('FAILED...', error);
                     formStatus.className = 'form-status error';
                     formStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to send. Please email me directly at skjoynul20@gmail.com';
-                    ;
+                    setTimeout(() => {
+                        formStatus.style.display = 'none';
+                    }, 6000);
                 })
                 .finally(function () {
                     submitBtn.disabled = false;
                 });
-
-            // Clear form fields
-            // form.reset();
-
-            // SIMULATED SUCCESS FOR NOW (remove this when using actual EmailJS)
-            setTimeout(() => {
-                formStatus.className = 'form-status success';
-                formStatus.innerHTML = '<i class="fas fa-check-circle"></i> Message sent successfully! (Demo mode - to enable real email, set up EmailJS)';
-                form.reset();
-                submitBtn.disabled = false;
-
-                setTimeout(() => {
-                    formStatus.style.display = 'none';
-                }, 5000);
-            }, 1500);
         });
-
-        // Instructions for setting up EmailJS (visible in console)
-        console.log(`
-            ========== EMAILJS SETUP INSTRUCTIONS ==========
-            
-            To make the contact form work with real emails:
-            
-            1. Go to https://www.emailjs.com/ and sign up (free tier: 200 emails/month)
-            
-            2. After signup:
-               - Go to "Email Services" → Add a new service (Gmail, Outlook, etc.)
-               - Note your Service ID
-            
-            3. Go to "Email Templates" → Create a new template:
-               - Design your email template
-               - Use variables like {{from_name}}, {{from_email}}, {{message}}
-               - Note your Template ID
-            
-            4. Go to "Account" → "API Keys" → Copy your Public Key
-            
-            5. In the code above:
-               - Replace "YOUR_PUBLIC_KEY" with your actual public key
-               - Uncomment the emailjs.send section
-               - Replace "YOUR_SERVICE_ID" and "YOUR_TEMPLATE_ID"
-               - Remove the simulated success timeout
-            
-            Current demo mode: Messages show as sent but don't actually email
-        `);
     </script>
 </body>
 
